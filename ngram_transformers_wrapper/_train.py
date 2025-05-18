@@ -22,20 +22,17 @@ def train(
     register_models()
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        input_text = Path(tmpdir) / "input.txt"
         arpa_file = Path(tmpdir) / "model.arpa"
         bin_file = Path(tmpdir) / "model.bin"
 
-        _logger.info("Prepare training texts")
-        with open(input_text, "w") as f:
+        def _train_inputs() -> Iterable[str]:
             for text in train_texts:
                 input_ids = tokenizer.encode(text)
                 encoded = " ".join([str(int(id)) for id in input_ids])
-                f.write(encoded + "\n")
+                yield encoded
 
-        _logger.info("Train NGram LM")
         lmplz(
-            input_text,
+            _train_inputs(),
             arpa_file,
             order=config.order,
             discount_fallback=config.discount_fallback,

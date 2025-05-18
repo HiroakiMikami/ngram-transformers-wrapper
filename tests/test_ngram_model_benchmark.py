@@ -1,11 +1,11 @@
-import time
 import os
-import torch
-from contextlib import contextmanager, redirect_stdout, redirect_stderr
+import time
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from typing import Iterable
 
-import pytest
 import datasets
+import pytest
+import torch
 from transformers import AutoTokenizer
 
 from ngram_transformers_wrapper._train import train
@@ -18,7 +18,13 @@ def dummy_dataset() -> Iterable[datasets.Dataset]:
 
     def _f(item: dict) -> dict:
         return {
-            "text": item["context"] + "\n\n" + "Question: " + item["question"] + "\n\n" + "Answer: " + item["answers"]["text"][0]
+            "text": item["context"]
+            + "\n\n"
+            + "Question: "
+            + item["question"]
+            + "\n\n"
+            + "Answer: "
+            + item["answers"]["text"][0]
         }
 
     ds = ds.map(_f)
@@ -43,14 +49,16 @@ def _measure(tag: str) -> Iterable[None]:
     print(f"#benchmark: {tag}\t: {end - begin} sec")
 
 
-
 @pytest.mark.benchmark
 @pytest.mark.parametrize("order", [2, 3, 4, 5, 6])
-@pytest.mark.parametrize("size_", [
+@pytest.mark.parametrize(
+    "size_",
+    [
         ("1KiB", 1024),
         ("1MiB", 1024 * 1024),
         ("10MiB", 10 * 1024 * 1024),
-    ])
+    ],
+)
 def test_train_benchmark(dummy_dataset: datasets.Dataset, order: int, size_: tuple[str, int]) -> None:
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     size_key, size = size_

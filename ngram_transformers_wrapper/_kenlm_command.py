@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import uuid
 from pathlib import Path
+from typing import Iterable
 
 from ngram_transformers_wrapper import _envvar
 
@@ -45,7 +46,7 @@ def _initialize() -> None:
 
 
 def lmplz(
-    input_path: Path,
+    inputs: Iterable[str],
     output_path: Path,
     order: int,
     skip_symbols: bool = False,
@@ -81,8 +82,6 @@ def lmplz(
         str(vocab_pad),
         "--prune",
         str(prune),
-        "--text",
-        str(input_path),
         "--arpa",
         str(output_path),
     ]
@@ -97,10 +96,15 @@ def lmplz(
     if discount_fallback is not None:
         args.extend(["--discount_fallback"] + [str(x) for x in discount_fallback])
     with tempfile.TemporaryDirectory() as tmpdir:
-        subprocess.run(
+        p = subprocess.Popen(
             [str(Path(cache_dir) / "kenlm" / "bin" / "lmplz")] + args + ["--temp_prefix", tmpdir],
-            check=True,
+            stdin=subprocess.PIPE,
         )
+        for text in inputs:
+            p.stdin.write((text + "\n").encode())
+        p.stdin.close()
+        p.wait()
+        assert p.returncode == 0
 
 
 def build_binary(
