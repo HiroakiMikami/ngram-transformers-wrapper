@@ -1,1 +1,3 @@
 kenlm @ git+https://github.com/kpu/kenlm.git
+transformers
+torch

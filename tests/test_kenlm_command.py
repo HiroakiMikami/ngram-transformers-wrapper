@@ -9,7 +9,6 @@ from ngram_transformers_wrapper._kenlm_command import build_binary, lmplz
 
 def test_build_ngram_lm() -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
-        tmpdir = "/tmp/test"
         # prepare input
         input_text = os.path.join(tmpdir, "input.txt")
         arpa_file = os.path.join(tmpdir, "test.arpa")
