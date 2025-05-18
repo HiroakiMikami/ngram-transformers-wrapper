@@ -1,7 +1,6 @@
-import os
 import time
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
-from typing import Iterable
+from typing import Iterable, Iterator
 
 import datasets
 import pytest
@@ -42,7 +41,7 @@ def _generate_dummy_train_data(ds: datasets.Dataset, size: int) -> Iterable[str]
 
 
 @contextmanager
-def _measure(tag: str) -> Iterable[None]:
+def _measure(tag: str) -> Iterator[None]:
     begin = time.perf_counter()
     yield
     end = time.perf_counter()
@@ -63,7 +62,7 @@ def test_train_benchmark(dummy_dataset: datasets.Dataset, order: int, size_: tup
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     size_key, size = size_
     with _measure(f"train-{size_key}-order-{order}"):
-        with redirect_stdout(os.devnull), redirect_stderr(os.devnull):
+        with redirect_stdout(None), redirect_stderr(None):
             train(
                 _generate_dummy_train_data(dummy_dataset, size),
                 [],

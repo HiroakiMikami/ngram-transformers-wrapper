@@ -100,6 +100,7 @@ def lmplz(
             [str(Path(cache_dir) / "kenlm" / "bin" / "lmplz")] + args + ["--temp_prefix", tmpdir],
             stdin=subprocess.PIPE,
         )
+        assert p.stdin is not None
         for text in inputs:
             p.stdin.write((text + "\n").encode())
         p.stdin.close()
