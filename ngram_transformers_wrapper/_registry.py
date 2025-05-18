@@ -5,4 +5,4 @@ from ngram_transformers_wrapper.modeling_ngram import NgramConfig, NgramForCausa
 
 def register_models() -> None:
     AutoConfig.register("ngram", NgramConfig)
-    AutoModelForCausalLM.register(NgramConfig, NgramForCausalLM)
+    NgramForCausalLM.register_for_auto_class(AutoModelForCausalLM)

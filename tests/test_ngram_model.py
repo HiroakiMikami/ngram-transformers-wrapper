@@ -1,3 +1,4 @@
+import os
 import tempfile
 from pathlib import Path
 from typing import Iterable
@@ -19,7 +20,10 @@ def test_save_pretrained_and_from_pretrained() -> None:
         model.set_model_data(torch.randint(0, 255, size=(1024,)).to(torch.uint8))
         model.save_pretrained(Path(tmpdir) / "model")
 
-        model2 = AutoModelForCausalLM.from_pretrained(Path(tmpdir) / "model")
+        assert os.path.exists(Path(tmpdir) / "model" / "config.json")
+        assert os.path.exists(Path(tmpdir) / "model" / "modeling_ngram.py")
+
+        model2 = AutoModelForCausalLM.from_pretrained(Path(tmpdir) / "model", trust_remote_code=True)
         torch.testing.assert_close(model.model_bin, model2.model_bin)
 
 
