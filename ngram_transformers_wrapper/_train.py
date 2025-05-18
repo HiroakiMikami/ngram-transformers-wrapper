@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Iterable
 
 import torch
-from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from ngram_transformers_wrapper._kenlm_command import build_binary, lmplz
@@ -16,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 def train(
     train_texts: Iterable[str],
-    val_texts: list[str],
+    val_texts: Iterable[str],
     tokenizer: AutoTokenizer,
     config: NgramConfig,
 ) -> NgramForCausalLM:
@@ -29,7 +28,7 @@ def train(
 
         _logger.info("Prepare training texts")
         with open(input_text, "w") as f:
-            for text in tqdm(train_texts):
+            for text in train_texts:
                 input_ids = tokenizer.encode(text)
                 encoded = " ".join([str(int(id)) for id in input_ids])
                 f.write(encoded + "\n")
@@ -44,11 +43,19 @@ def train(
         )
         build_binary(arpa_file, bin_file, type="trie")
 
+        assert config.vocab_size == tokenizer.vocab_size
         model = NgramForCausalLM(config)
         with open(bin_file, "rb") as f:
             t = torch.frombuffer(f.read(), dtype=torch.uint8)
             model.set_model_data(t)
 
     # TODO calculate val score
+    losses = []
+    for val_text in val_texts:
+        input_ids = tokenizer(val_text, return_tensors="pt").input_ids
+        losses.append(model(input_ids, labels=input_ids).loss)
+    if len(losses) != 0:
+        loss = sum(losses) / len(losses)
+        _logger.info(f"Val loss: {loss:.3f}")
 
     return model

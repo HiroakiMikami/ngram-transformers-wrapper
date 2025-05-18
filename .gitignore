@@ -7,5 +7,6 @@
 !requirements-lint.txt
 !requirements-tests.txt
 !pyproject.toml
+!pytest.ini
 !ngram_transformers_wrapper/*.py
 !/tests/*.py
