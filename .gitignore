@@ -1,0 +1,11 @@
+*
+!*/
+!LICENSE
+!Makefile
+!.gitignore
+!requirements.txt
+!requirements-lint.txt
+!requirements-tests.txt
+!pyproject.toml
+!ngram_transformers_wrapper/*.py
+!/tests/*.py

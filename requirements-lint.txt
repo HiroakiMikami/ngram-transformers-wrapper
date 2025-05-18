@@ -1,0 +1,7 @@
+black
+mypy
+isort<6.0.0  # pysen only support isort 4 and 5
+flake8>=7.2.0
+flake8-bugbear
+pysen
+pysen-plugins
