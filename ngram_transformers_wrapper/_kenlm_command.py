@@ -95,17 +95,17 @@ def lmplz(
         args.extend(["--limit_vocab_file", limit_vocab_file])
     if discount_fallback is not None:
         args.extend(["--discount_fallback"] + [str(x) for x in discount_fallback])
-    with tempfile.TemporaryDirectory() as tmpdir:
-        p = subprocess.Popen(
+    with tempfile.TemporaryDirectory() as tmpdir, tempfile.TemporaryDirectory() as input_dir:
+        # TODO overlap preparation of inputs and training of Ngram
+        input_text = os.path.join(input_dir, "input.txt")
+        with open(input_text, "w") as f:
+            for text in inputs:
+                f.write((text + "\n"))
+        args.extend(["--text", input_text])
+        subprocess.run(
             [str(Path(cache_dir) / "kenlm" / "bin" / "lmplz")] + args + ["--temp_prefix", tmpdir],
-            stdin=subprocess.PIPE,
+            check=True,
         )
-        assert p.stdin is not None
-        for text in inputs:
-            p.stdin.write((text + "\n").encode())
-        p.stdin.close()
-        p.wait()
-        assert p.returncode == 0
 
 
 def build_binary(
