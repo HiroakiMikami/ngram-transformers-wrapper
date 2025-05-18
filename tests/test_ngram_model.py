@@ -140,3 +140,16 @@ def test_batch_generate(dummy_model: tuple[AutoTokenizer, NgramForCausalLM]) -> 
     actual = model.generate(**batch, max_new_tokens=2, num_beams=1, do_sample=False, temperature=0.0)
     torch.testing.assert_close(expected0[0], actual[0])
     torch.testing.assert_close(expected1[0], actual[1][-4:])
+
+
+def test_perplexity(dummy_model: tuple[AutoTokenizer, NgramForCausalLM]) -> None:
+    tokenizer, model = dummy_model
+    text0 = "A B C D E"
+    text1 = "A B"
+    batch = tokenizer([text0, text1], return_tensors="pt", padding=True)
+    actual = model.perplexity(**batch)
+    expected0 = model.perplexity(tokenizer([text0], return_tensors="pt").input_ids)
+    expected1 = model.perplexity(tokenizer([text1], return_tensors="pt").input_ids)
+    assert actual.shape == (2,)
+    torch.testing.assert_close(actual[0], expected0[0])
+    torch.testing.assert_close(actual[1], expected1[0])

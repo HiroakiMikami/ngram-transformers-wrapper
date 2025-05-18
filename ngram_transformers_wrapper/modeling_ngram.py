@@ -140,6 +140,19 @@ class NgramForCausalLM(PreTrainedModel):  # type: ignore
         }
         return model_inputs
 
+    def perplexity(self, input_ids: torch.Tensor, attention_mask: torch.Tensor | None = None) -> torch.Tensor:
+        self._load_model()
+        assert self._model is not None
+        out = []
+        for i in range(len(input_ids)):
+            input_ids_i = input_ids[i]
+            if attention_mask is not None:
+                mask_i = attention_mask[i]
+                input_ids_i = input_ids_i[mask_i == 1]
+            text = " ".join([str(int(i)) for i in input_ids_i])
+            out.append(self._model.perplexity(text))
+        return torch.tensor(out)
+
     def _compute_logits(self, state: kenlm.State, token: int | None) -> tuple[torch.Tensor, kenlm.State | None]:
         self._load_model()
         assert self._model is not None
